@@ -1,4 +1,3 @@
-/** Represents an iterator of a linked list. */
 public class ListIterator {
 
     // current position in the list (cursor)
