@@ -1,3 +1,4 @@
+
 /**
  * Represents a block of memory.
  * Each memory block has a base address, and a length in words. 

@@ -1,3 +1,4 @@
+
 /**
  * Represents a managed memory space. The memory space manages a list of allocated 
  * memory blocks, and a list free memory blocks. The methods "malloc" and "free" are 
@@ -58,8 +59,46 @@ public class MemorySpace {
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
 	public int malloc(int length) {		
-		//// Replace the following statement with your code
+		/*ListIterator iterator = freeList.iterator();
+		while (iterator.hasNext()){
+			MemoryBlock tMemoryBlock = iterator.next();
+			if (length == tMemoryBlock.length){
+				freeList.remove(tMemoryBlock);
+				allocatedList.addLast(tMemoryBlock);
+				return tMemoryBlock.baseAddress;
+			}
+			if (length <= tMemoryBlock.length){
+				allocatedList.addLast(new MemoryBlock(tMemoryBlock.baseAddress, length));
+				freeList.remove(tMemoryBlock);
+				freeList.addLast(new MemoryBlock(tMemoryBlock.baseAddress + length,
+												 tMemoryBlock.length - length));
+				return tMemoryBlock.baseAddress;
+			}
+		}
+			*/
+		/* */
+		MemoryBlock tempBlock = null;
+		ListIterator iterator = freeList.iterator();
+		while (iterator.hasNext()) {
+			MemoryBlock tempIterator = iterator.next();
+			if (tempIterator.length >= length){
+				tempBlock = tempIterator;
+				break;
+			}
+		}
+		
+		if (tempBlock == null){
 		return -1;
+		}
+		MemoryBlock insertBlock = new MemoryBlock(tempBlock.baseAddress, length);
+		allocatedList.addLast(insertBlock);
+		if (length == tempBlock.length){
+			freeList.remove(insertBlock);
+			return tempBlock.baseAddress;
+		}
+		tempBlock.baseAddress += length;
+		tempBlock.length -= length;
+		return insertBlock.baseAddress;
 	}
 
 	/**
@@ -71,7 +110,18 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
-		//// Write your code here
+		if (allocatedList.getSize() == 0) { 
+			throw new IllegalArgumentException("index must be between 0 and size");
+		}
+		ListIterator iterator = allocatedList.iterator();
+		while (iterator.hasNext()) {
+			MemoryBlock tMemoryBlock = iterator.next();
+			if (address == tMemoryBlock.baseAddress){
+				allocatedList.remove(tMemoryBlock);
+				freeList.addLast(tMemoryBlock);
+				return;
+			}
+		}
 	}
 	
 	/**
@@ -88,6 +138,19 @@ public class MemorySpace {
 	 * In this implementation Malloc does not call defrag.
 	 */
 	public void defrag() {
-		//// Write your code here
+		ListIterator mainIterator = freeList.iterator();
+		ListIterator secondIterator = freeList.iterator();
+		while (mainIterator.hasNext()) {
+			MemoryBlock tMemoryBlock = mainIterator.next();
+			int baseSearch = tMemoryBlock.baseAddress + tMemoryBlock.length;
+			while (secondIterator.hasNext()){
+				MemoryBlock tMemoryBlock2 = secondIterator.next();
+				if (baseSearch == tMemoryBlock2.baseAddress) {
+					tMemoryBlock.length += tMemoryBlock2.length;
+					freeList.remove(tMemoryBlock2);
+					defrag();
+				}
+			}
+		}
 	}
 }
